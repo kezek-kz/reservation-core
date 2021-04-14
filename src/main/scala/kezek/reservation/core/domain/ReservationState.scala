@@ -10,34 +10,23 @@ trait ReservationState {
 object ReservationState {
 
   final val CREATED = "СОЗДАН"
-  final val APPROVED = "ПОДТВЕРЖДЕН"
-  final val REJECTED = "ОТКАЗОНО"
-  final val PAID = "ОПЛАЧЕН"
-  final val PREPARING = "ГОТОВИТЬСЯ"
-  final val COMPLETED = "ГОТОВО"
+  final val WAITING_PAYMENT = "ОЖИДАНИЕ ОПЛАТЫ"
+  final val CANCELED = "ОТМЕНЕН"
+  final val RESERVED = "ЗАБРОНИРОВАНО"
 
   case class Created(name: String, createdAt: DateTime) extends ReservationState {
     require(name == CREATED)
   }
 
-  case class Approved(name: String, createdAt: DateTime) extends ReservationState {
-    require(name == APPROVED)
+  case class WaitingPayment(name: String, createdAt: DateTime) extends ReservationState {
+    require(name == WAITING_PAYMENT)
   }
 
-  case class Rejected(reason: String, name: String, createdAt: DateTime) extends ReservationState {
-    require(name == REJECTED)
+  case class Canceled(reason: String, name: String, createdAt: DateTime) extends ReservationState {
+    require(name == CANCELED)
   }
 
-  case class Paid(paymentDetails: Json, name: String, createdAt: DateTime) extends ReservationState {
-    require(name == PAID)
+  case class Reserved(paymentDetails: Json, name: String, createdAt: DateTime) extends ReservationState {
+    require(name == RESERVED)
   }
-
-  case class Preparing(name: String, createdAt: DateTime) extends ReservationState {
-    require(name == PREPARING)
-  }
-
-  case class Completed(name: String, createdAt: DateTime) extends ReservationState {
-    require(name == COMPLETED)
-  }
-
 }

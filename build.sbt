@@ -50,8 +50,8 @@ enablePlugins(JavaAppPackaging)
 
 // heroku deployment configs
 herokuAppName in Compile := Map(
-  "prod"  -> "prod-kezek-order-core",
-  "dev" -> "dev-kezek-order-core",
+  "prod"  -> "prod-kezek-reservation-core",
+  "dev" -> "dev-kezek-reservation-core",
 )(sys.props.getOrElse("env", "dev"))
 
 herokuJdkVersion in Compile := "1.8"

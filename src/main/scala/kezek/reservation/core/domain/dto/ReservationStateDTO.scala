@@ -6,13 +6,10 @@ trait ReservationStateDTO
 
 object ReservationStateDTO {
 
-  case class ApprovedDTO(name: String) extends ReservationStateDTO
+  case class CanceledDTO(reason: String, name: String) extends ReservationStateDTO
 
-  case class RejectedDTO(reason: String, name: String) extends ReservationStateDTO
+  case class ReservedDTO(paymentDetails: Json, name: String) extends ReservationStateDTO
 
-  case class PaidDTO(paymentDetails: Json, name: String) extends ReservationStateDTO
+  case class WaitingPaymentDTO(name: String) extends ReservationStateDTO
 
-  case class PreparingDTO(name: String) extends ReservationStateDTO
-
-  case class CompletedDTO(name: String) extends ReservationStateDTO
 }

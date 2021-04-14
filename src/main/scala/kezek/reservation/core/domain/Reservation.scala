@@ -1,7 +1,7 @@
 package kezek.reservation.core.domain
 
 import io.circe.Json
-import ReservationState.{Paid, Rejected}
+import ReservationState.{Reserved, Canceled}
 import org.joda.time.DateTime
 
 case class Reservation(id: Long,
@@ -20,8 +20,8 @@ case class Reservation(id: Long,
 
   def changeState(newState: ReservationState): Reservation = {
     (newState match {
-      case s: Rejected => this.copy(rejectReason = Some(s.reason))
-      case s: Paid => this.copy(paymentDetails = Some(s.paymentDetails))
+      case s: Canceled => this.copy(rejectReason = Some(s.reason))
+      case s: Reserved => this.copy(paymentDetails = Some(s.paymentDetails))
       case _ => this
     }).copy(
       status = newState.name,

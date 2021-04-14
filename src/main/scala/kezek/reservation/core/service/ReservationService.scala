@@ -42,11 +42,9 @@ object ReservationService extends MainCodec {
   def transformToReservationState(reservationStateDTO: ReservationStateDTO): ReservationState = {
     log.debug(s"transformToReservationState() was called {amlRequestStateDTO: ${reservationStateDTO.asJson.noSpaces}}")
     reservationStateDTO match {
-      case ApprovedDTO(name) => Approved(name, DateTime.now())
-      case RejectedDTO(reason, name) => Rejected(reason, name, DateTime.now())
-      case PaidDTO(paymentDetails, name) => Paid(paymentDetails, name, DateTime.now())
-      case PreparingDTO(name) => Preparing(name, DateTime.now())
-      case CompletedDTO(name) => Completed(name, DateTime.now())
+      case WaitingPaymentDTO(name) => WaitingPayment(name, DateTime.now())
+      case CanceledDTO(reason, name) => Canceled(reason, name, DateTime.now())
+      case ReservedDTO(paymentDetails, name) => Reserved(paymentDetails, name, DateTime.now())
     }
   }
 
@@ -87,11 +85,11 @@ class ReservationService()(implicit val mongoClient: MongoClient,
   def isStateChangeValid(reservation: Reservation, newState: ReservationState): Boolean = {
     log.debug(s"isStateChangeValid() was called {currentStatus: ${reservation.status}, newStatus: ${newState.name}}")
     (reservation.status, newState.name) match {
-      case (CREATED, APPROVED) => true
-      case (CREATED, REJECTED) => true
-      case (APPROVED, PAID) => true
-      case (PAID, PREPARING) => true
-      case (PREPARING, COMPLETED) => true
+      case (CREATED, WAITING_PAYMENT) => true
+      case (CREATED, CANCELED) => true
+      case (WAITING_PAYMENT, CANCELED) => true
+      case (WAITING_PAYMENT, RESERVED) => true
+      case (RESERVED, CANCELED) => true
       case _ => false
     }
   }
