@@ -175,7 +175,7 @@ trait RestaurantMapHttpRoutes extends MainCodec {
   @Tag(name = "Restaurant Map / Tables")
   def getTableById: Route = {
     get {
-      path(Segment) { id =>
+      path(Segment / "tables" / Segment) { (mapId, id) =>
         onComplete(tableService.getById(id)) {
           case Success(result) => complete(result)
           case Failure(exception) => HttpUtil.completeThrowable(exception)
