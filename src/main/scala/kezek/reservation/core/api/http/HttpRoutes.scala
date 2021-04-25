@@ -9,13 +9,13 @@ import kezek.reservation.core.api.http.route.{ReservationHttpRoutes, RestaurantM
 
 import javax.ws.rs.{GET, Path}
 
-@Path("/api/v1")
+@Path("/api")
 trait HttpRoutes
   extends ReservationHttpRoutes
   with RestaurantMapHttpRoutes {
 
   val routes: Route = {
-    pathPrefix("api" / "v1") {
+    pathPrefix("api") {
       concat(
         healthcheck,
         reservationHttpRoutes,
