@@ -35,7 +35,7 @@ case class HttpServer()(implicit val actorSystem: ActorSystem[_],
         port = config.getInt("http-server.port")
       )
       .bind(
-        concat (routes, swaggerSiteRoute, new SwaggerDocService().routes)
+        cors(CorsSettings(config)) { concat (routes, swaggerSiteRoute, new SwaggerDocService().routes) }
       )
       .onComplete {
         case Success(binding) =>
