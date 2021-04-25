@@ -45,7 +45,9 @@ libraryDependencies ++= Seq(
   //
   "io.scalaland" %% "chimney" % "0.6.1",
   //
-  "ch.megard" %% "akka-http-cors" % "1.1.1"
+  "ch.megard" %% "akka-http-cors" % "1.1.1",
+  //
+  "com.github.kenglxn.QRGen" % "android" % "2.6.0"
 )
 
 enablePlugins(JavaAppPackaging)

@@ -49,7 +49,7 @@ class RestaurantMapService()(implicit val mongoClient: MongoClient,
     }
     for(
       _ <- restaurantMapBucket.delete(s"$bucketFolder/$restaurantMapId");
-      svgUrl <- restaurantMapBucket.upload(byteSource, s"$bucketFolder/$restaurantMapId", fileInfo);
+      svgUrl <- restaurantMapBucket.uploadByteSource(byteSource, s"$bucketFolder/$restaurantMapId", fileInfo);
       restaurantMap <- restaurantMapRepository.upsert(
         restaurantMapId,
         RestaurantMap(restaurantMapId, svgUrl)
