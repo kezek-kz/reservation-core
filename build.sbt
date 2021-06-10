@@ -9,6 +9,7 @@ lazy val akkaHttpVersion  = "10.2.1"
 lazy val swaggerVersion   = "2.1.2"
 lazy val circeVersion = "0.13.0"
 checksums := Nil
+deployHeroku / checksums := Nil
 
 resolvers += "jitpack" at "https://jitpack.io"
 
