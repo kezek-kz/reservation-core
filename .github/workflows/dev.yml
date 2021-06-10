@@ -35,7 +35,7 @@ jobs:
           MONGO_CONCURRENT_BOOKER_COLLECTION: concurrent-booker
           LOG_LEVEL: DEBUG
           MONGO_DATABASE: dev_kezek
-          HOST: 0.0.0.0,
+          HOST: 0.0.0.0
           SWAGGER_SCHEMES: https
           SWAGGER_HOST: dev-kezek-reservation-core.herokuapp.com
           ENV: dev
