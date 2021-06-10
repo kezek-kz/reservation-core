@@ -21,6 +21,7 @@ libraryDependencies ++= Seq(
   //
   "com.github.kenglxn.QRGen" % "core" % "2.6.0",
   "com.github.kenglxn.QRGen" % "javase" % "2.6.0",
+  "org.scala-lang.modules" %% "scala-xml" % "2.0.0",
   //
   "com.amazonaws" % "aws-java-sdk-s3" % "1.11.993",
   //

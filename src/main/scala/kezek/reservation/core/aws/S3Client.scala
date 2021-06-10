@@ -5,11 +5,11 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.joda.time.DateTime
 
-import java.io.File
+import java.io.{File, InputStream}
 import scala.concurrent.Future
 
 trait S3Client {
-  def uploadByteSource(byteSource: Source[ByteString, Any],
+  def uploadByteSource(inputStream: InputStream,
                        key: String,
                        fileInfo: FileInfo): Future[String]
 

@@ -8,7 +8,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import com.typesafe.config.{Config, ConfigFactory}
 import kezek.reservation.core.swagger.SwaggerSite
-import kezek.reservation.core.service.{ReservationService, RestaurantMapService, TableService}
+import kezek.reservation.core.service.{NotificationService, ReservationService, RestaurantMapService, TableService}
 import kezek.reservation.core.swagger.{SwaggerDocService, SwaggerSite}
 import kezek.reservation.core.swagger.SwaggerSite
 import org.slf4j.{Logger, LoggerFactory}
@@ -20,6 +20,7 @@ import scala.util.{Failure, Success}
 case class HttpServer()(implicit val actorSystem: ActorSystem[_],
                         implicit val executionContext: ExecutionContext,
                         implicit val tableService: TableService,
+                        implicit val notificationService: NotificationService,
                         implicit val restaurantMapService: RestaurantMapService,
                         implicit val reservationService: ReservationService)
   extends HttpRoutes with SwaggerSite {

@@ -5,11 +5,11 @@ import ReservationState.{Reserved, Canceled}
 import org.joda.time.DateTime
 
 case class Reservation(id: Long,
-                       slug: String,
                        customerId: String,
                        tables: Seq[String],
                        reservations: Seq[String],
                        date: DateTime,
+                       bookingTime: String,
                        createdAt: DateTime,
                        updatedAt: DateTime,
                        deposit: BigDecimal,

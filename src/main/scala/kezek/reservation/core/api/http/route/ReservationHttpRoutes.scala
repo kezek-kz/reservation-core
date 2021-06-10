@@ -55,11 +55,9 @@ trait ReservationHttpRoutes extends MainCodec {
           schema = new Schema(implementation = classOf[ReservationStateDTO]),
           mediaType = "application/json",
           examples = Array(
-            new ExampleObject(name = "ApprovedDTO", value = "{\n  \"name\": \"ПОДТВЕРЖДЕН\"\n}"),
-            new ExampleObject(name = "RejectedDTO", value = "{\n  \"name\": \"ОТКАЗОНО\"\n  \"reason\": \"Some reason\"\n}"),
-            new ExampleObject(name = "PaidDTO", value = "{\n  \"name\": \"ОПЛАЧЕН\",\n  \"paymentDetails\": {}\n}"),
-            new ExampleObject(name = "PreparingDTO", value = "{\n  \"name\": \"ГОТОВИТЬСЯ\"\n}"),
-            new ExampleObject(name = "CompletedDTO", value = "{\n  \"name\": \"ГОТОВО\"\n}"),
+            new ExampleObject(name = "CancelDTO", value = "{\n  \"name\": \"ОТМЕНЕН\",\n  \"reason\": \"не успел\"\n}"),
+            new ExampleObject(name = "ReservedDTO", value = "{\n  \"name\": \"ЗАБРОНИРОВАНО\",\n  \"paymentDetails\": {}\n}"),
+            new ExampleObject(name = "WaitingPaymentDTO", value = "{\n  \"name\": \"ОЖИДАНИЕ ОПЛАТЫ\"}"),
           )
         ),
       ),

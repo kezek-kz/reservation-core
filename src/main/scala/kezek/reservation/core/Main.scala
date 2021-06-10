@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.typesafe.config.{Config, ConfigFactory}
 import kezek.reservation.core.api.http.HttpServer
 import kezek.reservation.core.scripts.SeedScript
-import kezek.reservation.core.service.{ReservationService, RestaurantMapService, TableService}
+import kezek.reservation.core.service.{NotificationService, ReservationService, RestaurantMapService, TableService}
 import org.mongodb.scala.MongoClient
 
 import scala.concurrent.ExecutionContext
@@ -41,6 +41,7 @@ object Main extends App {
   implicit val tableService: TableService = new TableService()
   implicit val restaurantMapService: RestaurantMapService = new RestaurantMapService()
   implicit val reservationService: ReservationService = new ReservationService()
+  implicit val notificationService: NotificationService = new NotificationService()
 
   HttpServer().run()
 

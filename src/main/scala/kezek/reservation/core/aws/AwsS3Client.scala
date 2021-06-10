@@ -20,11 +20,10 @@ class AwsS3Client(bucket: String)(implicit val s3Client: AmazonS3,
 
   val log: Logger = LoggerFactory.getLogger(getClass.getSimpleName)
 
-  override def uploadByteSource(byteSource: Source[ByteString, Any],
+  override def uploadByteSource(inputStream: InputStream,
                                 key: String,
                                 fileInfo: FileInfo): Future[String] = Future {
     log.debug(s"uploadByteSource() was called {key: $key, contentType: ${fileInfo.contentType.toString()}}")
-    val inputStream: InputStream = byteSource.runWith(StreamConverters.asInputStream(5.minutes))
     val metadata: ObjectMetadata = new ObjectMetadata()
     metadata.setContentType(fileInfo.contentType.toString())
     s3Client.putObject(
