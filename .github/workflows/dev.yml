@@ -32,6 +32,7 @@ jobs:
           MONGO_TABLE_COLLECTION: table
           MONGO_RESERVATION_COLLECTION: reservation
           MONGO_RESTAURANT_MAP_COLLECTION: restaurant-map
+          MONGO_CONCURRENT_BOOKER_COLLECTION: concurrent-booker
           LOG_LEVEL: DEBUG
           MONGO_DATABASE: dev_kezek
           HOST: 0.0.0.0,
