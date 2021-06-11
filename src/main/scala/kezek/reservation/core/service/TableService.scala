@@ -11,12 +11,15 @@ import kezek.reservation.core.aws.{AwsS3Client, S3Client}
 import kezek.reservation.core.codec.MainCodec
 import kezek.reservation.core.domain.Table
 import kezek.reservation.core.domain.TableFilter.ByTableIdListFilter
+import kezek.reservation.core.domain.TableState.{BLOCKED, FREE, RESERVED}
 import kezek.reservation.core.domain.dto.{CreateTableDTO, UpdateTableDTO}
 import kezek.reservation.core.exception.ApiException
 import kezek.reservation.core.repository.TableRepository
 import kezek.reservation.core.repository.mongo.TableMongoRepository
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
+import org.apache.http.HttpStatus
+import org.joda.time.DateTime
 import org.mongodb.scala.MongoClient
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -26,6 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TableService()(implicit val mongoClient: MongoClient,
                      implicit val executionContext: ExecutionContext,
+                     implicit val reservationService: ReservationService,
                      implicit val system: ActorSystem[_],
                      implicit val s3Client: AmazonS3) extends MainCodec {
 
@@ -35,6 +39,27 @@ class TableService()(implicit val mongoClient: MongoClient,
   val bucket: S3Client = new AwsS3Client("kezek")
   val bucketFolder: String = "table-qr"
   val url: String = config.getString("application.qr-prefix-url")
+
+  def getAllTables(date: Option[DateTime], bookingTime: Option[String]): Future[Seq[Table]] = {
+    tableRepository.findAll(Seq.empty).flatMap(tables => Future.sequence(tables.map(table => attachState(table, date, bookingTime))))
+  }
+
+  def getById(id: String, date: Option[DateTime], bookingTime: Option[String]): Future[Table] = {
+    tableRepository.findById(id).map {
+      case Some(table) => table
+      case None => throw ApiException(StatusCodes.NotFound, s"Table with id = '$id' not found")
+    } flatMap { table => attachState(table, date, bookingTime) }
+  }
+
+  def attachState(table: Table, date: Option[DateTime], bookingTime: Option[String]): Future[Table] = {
+    if(table.state != BLOCKED) {
+      reservationService.isTableReserved(table.id, date.get, bookingTime.get) map {
+        isReserved => table.copy(state = if(isReserved) RESERVED else FREE)
+      }
+    } else {
+      Future { table }
+    }
+  }
 
   def update(id: String, updateTableDTO: UpdateTableDTO): Future[Table] = {
     log.debug(s"update() was called {id: $id, updateTableDTO: $updateTableDTO}")

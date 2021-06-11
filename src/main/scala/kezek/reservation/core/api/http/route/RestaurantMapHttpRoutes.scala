@@ -17,6 +17,7 @@ import kezek.reservation.core.domain.{RestaurantMap, Table}
 import kezek.reservation.core.service.{RestaurantMapService, TableService}
 import kezek.reservation.core.swagger.UploadMapMultipartRequest
 import kezek.reservation.core.util.HttpUtil
+import org.joda.time.DateTime
 
 import javax.ws.rs.{DELETE, GET, POST, PUT, Path}
 import scala.util.{Failure, Success}
@@ -31,7 +32,6 @@ trait RestaurantMapHttpRoutes extends MainCodec {
       concat(
         getTableById,
         updateTable,
-        deleteTable,
         addTable,
         getRestaurantMapById,
         deleteRestaurantMap,
@@ -156,6 +156,8 @@ trait RestaurantMapHttpRoutes extends MainCodec {
     method = "GET",
     parameters = Array(
       new Parameter(name = "id", in = ParameterIn.PATH, example = "", required = true),
+      new Parameter(name = "date", in = ParameterIn.QUERY, required = false),
+      new Parameter(name = "bookingTime", in = ParameterIn.QUERY, required = false, schema = new Schema(allowableValues = Array("До обеда", "После обеда", "Вечер")))
     ),
     responses = Array(
       new ApiResponse(
@@ -171,19 +173,59 @@ trait RestaurantMapHttpRoutes extends MainCodec {
       new ApiResponse(responseCode = "500", description = "Internal server error")
     )
   )
-  @Path("/restaurant-maps/{mapId}/tables/{id}")
+  @Path("/tables/{id}")
   @Tag(name = "Restaurant Map / Tables")
   def getTableById: Route = {
     get {
-      path(Segment / "tables" / Segment) { (mapId, id) =>
-        onComplete(tableService.getById(id)) {
-          case Success(result) => complete(result)
-          case Failure(exception) => HttpUtil.completeThrowable(exception)
+      path("tables" / Segment) { id =>
+        parameters("date".as[DateTime].?, "bookingTime".?) { (date, bookingTime) =>
+          onComplete(tableService.getById(id, date, bookingTime)) {
+            case Success(result) => complete(result)
+            case Failure(exception) => HttpUtil.completeThrowable(exception)
+          }
         }
       }
     }
   }
-
+  
+  @GET
+  @Operation(
+    summary = "Get all tables",
+    description = "Returns a list of tables",
+    method = "GET",
+    parameters = Array(
+      new Parameter(name = "date", in = ParameterIn.QUERY, required = false),
+      new Parameter(name = "bookingTime", in = ParameterIn.QUERY, required = false, schema = new Schema(allowableValues = Array("До обеда", "После обеда", "Вечер")))
+    ),
+    responses = Array(
+      new ApiResponse(
+        responseCode = "200",
+        description = "OK",
+        content = Array(
+          new Content(
+            schema = new Schema(implementation = classOf[Seq[Table]]),
+            examples = Array(new ExampleObject(name = "Table", value = ""))
+          )
+        )
+      ),
+      new ApiResponse(responseCode = "500", description = "Internal server error")
+    )
+  )
+  @Path("/tables")
+  @Tag(name = "Restaurant Map / Tables")
+  def getTableAllTables: Route = {
+    get {
+      path("tables") { 
+        parameters("date".as[DateTime].?, "bookingTime".?) { (date, bookingTime) =>
+          onComplete(tableService.getAllTables(date, bookingTime)) {
+            case Success(result) => complete(result)
+            case Failure(exception) => HttpUtil.completeThrowable(exception)
+          }
+        }
+      }
+    }
+  }
+  
   @POST
   @Operation(
     summary = "Create table",
@@ -213,11 +255,11 @@ trait RestaurantMapHttpRoutes extends MainCodec {
     )
   )
   @Parameter(name = "mapId", in = ParameterIn.PATH, required = true)
-  @Path("/restaurant-maps/{mapId}/tables")
+  @Path("/tables")
   @Tag(name = "Restaurant Map / Tables")
   def addTable: Route = {
     post {
-      path(Segment / "tables") { mapId =>
+      path("tables") { mapId =>
         entity(as[CreateTableDTO]) { body =>
           onComplete(tableService.create(mapId, body)) {
             case Success(result) => complete(result)
@@ -256,13 +298,13 @@ trait RestaurantMapHttpRoutes extends MainCodec {
       new ApiResponse(responseCode = "500", description = "Internal server error")
     )
   )
-  @Path("/restaurant-maps/{mapId}/tables/{id}")
+  @Path("/tables/{id}")
   @Parameter(name = "mapId", in = ParameterIn.PATH, required = true)
   @Parameter(name = "id", in = ParameterIn.PATH, required = true)
   @Tag(name = "Restaurant Map / Tables")
   def updateTable: Route = {
     put {
-      path(Segment / "tables" / Segment) { (mapId, tableId) =>
+      path("tables" / Segment) { (mapId, tableId) =>
         entity(as[UpdateTableDTO]) { body =>
           onComplete(tableService.update(tableId, body)) {
             case Success(result) => complete(result)
@@ -273,32 +315,5 @@ trait RestaurantMapHttpRoutes extends MainCodec {
     }
   }
 
-  @DELETE
-  @Operation(
-    summary = "Deletes table",
-    description = "Deletes table",
-    method = "DELETE",
-    responses = Array(
-      new ApiResponse(
-        responseCode = "204",
-        description = "OK",
-      ),
-      new ApiResponse(responseCode = "500", description = "Internal server error")
-    )
-  )
-  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true)
-  @Parameter(name = "id", in = ParameterIn.PATH, required = true)
-  @Path("/restaurant-maps/{mapId}/tables/{id}")
-  @Tag(name = "Restaurant Map / Tables")
-  def deleteTable: Route = {
-    delete {
-      path(Segment / "tables" / Segment) { (mapId, tableId) =>
-        onComplete(tableService.delete(tableId)) {
-          case Success(_) => complete(StatusCodes.NoContent)
-          case Failure(exception) => HttpUtil.completeThrowable(exception)
-        }
-      }
-    }
-  }
 
 }

@@ -84,6 +84,10 @@ class ReservationService()(implicit val mongoClient: MongoClient,
     }
   }
 
+  def isTableReserved(tableId: String, date: DateTime, bookingTime: String): Future[Boolean] = {
+    reservationRepository.findByTableIdAndDateAndBookingTime(tableId, date, bookingTime)
+  }
+
   def changeConcurrentBookerCount(status: String, tableIds: Seq[String], date: DateTime, bookingTime: String): Unit = {
     status match {
       case CREATED => tableIds.foreach(tableId => notificationService.increment(tableId, date, bookingTime))

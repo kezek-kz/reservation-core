@@ -8,3 +8,9 @@ case class Table(id: String,
                  `type`: String,
                  deposit: BigDecimal,
                  qrLink: Option[String])
+
+object TableState {
+  final val BLOCKED: String = "BLOCKED"
+  final val RESERVED: String = "RESERVED"
+  final val FREE: String = "FREE"
+}

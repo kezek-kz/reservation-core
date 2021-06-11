@@ -17,6 +17,7 @@ import kezek.reservation.core.repository.ReservationRepository
 import kezek.reservation.core.util.{PaginationUtil, SortType}
 import kezek.reservation.core.domain.ReservationFilter
 import kezek.reservation.core.util.SortType
+import org.joda.time.DateTime
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.UpdateOptions
@@ -144,5 +145,15 @@ class ReservationMongoRepository()(implicit val mongoClient: MongoClient,
         throw ApiException(StatusCodes.NotFound, "Failed to delete reservation")
       }
     }
+  }
+
+  override def findByTableIdAndDateAndBookingTime(tableId: String, date: DateTime, bookingTime: String): Future[Boolean] = {
+    collection.countDocuments(
+      and(
+        equal("date", date.getMillis),
+        equal("bookingTime", bookingTime),
+        equal("tableIds", tableId)
+      )
+    ).toFuture().map(_ > 0)
   }
 }

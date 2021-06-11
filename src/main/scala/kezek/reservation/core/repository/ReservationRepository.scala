@@ -5,10 +5,13 @@ import kezek.reservation.core.domain.ReservationFilter
 import kezek.reservation.core.domain.{Reservation, ReservationFilter}
 import kezek.reservation.core.util.SortType
 import kezek.reservation.core.domain.ReservationFilter
+import org.joda.time.DateTime
 
 import scala.concurrent.Future
 
 trait ReservationRepository {
+
+  def findByTableIdAndDateAndBookingTime(tableId: String, date: DateTime, bookingTime: String): Future[Boolean]
 
   def create(reservation: Reservation): Future[Reservation]
 
