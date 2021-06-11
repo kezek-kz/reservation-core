@@ -89,7 +89,7 @@ class TableService()(implicit val mongoClient: MongoClient,
   }
 
   def generateQr(table: Table): Future[Table] = {
-    val file = QRCode.from(s"$url?table=${table.id}")
+    val file = QRCode.from(s"""{ "tableId": "${table.id}"}""")
       .withSize(250, 250)
       .to(ImageType.PNG)
       .file(table.id)
