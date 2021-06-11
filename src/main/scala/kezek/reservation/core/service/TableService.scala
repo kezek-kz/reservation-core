@@ -9,13 +9,13 @@ import io.circe.syntax.EncoderOps
 import io.scalaland.chimney.dsl.TransformerOps
 import kezek.reservation.core.aws.{AwsS3Client, S3Client}
 import kezek.reservation.core.codec.MainCodec
-import kezek.reservation.core.domain.Table
+import kezek.reservation.core.domain.{ReservationState, Table}
 import kezek.reservation.core.domain.TableFilter.ByTableIdListFilter
 import kezek.reservation.core.domain.TableState.{BLOCKED, FREE, RESERVED}
 import kezek.reservation.core.domain.dto.{CreateTableDTO, UpdateTableDTO}
 import kezek.reservation.core.exception.ApiException
-import kezek.reservation.core.repository.TableRepository
-import kezek.reservation.core.repository.mongo.TableMongoRepository
+import kezek.reservation.core.repository.{ReservationRepository, TableRepository}
+import kezek.reservation.core.repository.mongo.{ReservationMongoRepository, TableMongoRepository}
 import net.glxn.qrgen.core.image.ImageType
 import net.glxn.qrgen.javase.QRCode
 import org.apache.http.HttpStatus
@@ -39,6 +39,7 @@ class TableService()(implicit val mongoClient: MongoClient,
   val bucket: S3Client = new AwsS3Client("kezek")
   val bucketFolder: String = "table-qr"
   val url: String = config.getString("application.qr-prefix-url")
+  val reservationRepository: ReservationRepository = new ReservationMongoRepository()
 
   def getAllTables(date: Option[DateTime], bookingTime: Option[String]): Future[Seq[Table]] = {
     tableRepository.findAll(Seq.empty).flatMap(tables => Future.sequence(tables.map(table => attachState(table, date, bookingTime))))
@@ -52,8 +53,8 @@ class TableService()(implicit val mongoClient: MongoClient,
   }
 
   def attachState(table: Table, date: Option[DateTime], bookingTime: Option[String]): Future[Table] = {
-    if(table.state != BLOCKED) {
-      reservationService.isTableReserved(table.id, date.get, bookingTime.get) map {
+    if(table.state != BLOCKED && date.isDefined && bookingTime.isDefined) {
+      reservationRepository.isTableReserved(table.id, date.get, bookingTime.get, ReservationState.RESERVED) map {
         isReserved => table.copy(state = if(isReserved) RESERVED else FREE)
       }
     } else {

@@ -147,12 +147,13 @@ class ReservationMongoRepository()(implicit val mongoClient: MongoClient,
     }
   }
 
-  override def findByTableIdAndDateAndBookingTime(tableId: String, date: DateTime, bookingTime: String): Future[Boolean] = {
+  override def isTableReserved(tableId: String, date: DateTime, bookingTime: String, status: String): Future[Boolean] = {
     collection.countDocuments(
       and(
-        equal("date", date.getMillis),
+        equal("date", date.withTimeAtStartOfDay().getMillis),
         equal("bookingTime", bookingTime),
-        equal("tableIds", tableId)
+        equal("tables", tableId),
+        equal("status", status)
       )
     ).toFuture().map(_ > 0)
   }

@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 trait ReservationRepository {
 
-  def findByTableIdAndDateAndBookingTime(tableId: String, date: DateTime, bookingTime: String): Future[Boolean]
+  def isTableReserved(tableId: String, date: DateTime, bookingTime: String, status: String): Future[Boolean]
 
   def create(reservation: Reservation): Future[Reservation]
 
