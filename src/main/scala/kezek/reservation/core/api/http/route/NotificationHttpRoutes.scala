@@ -3,22 +3,23 @@ package kezek.reservation.core.api.http.route
 import akka.NotUsed
 import akka.http.scaladsl.model.sse.ServerSentEvent
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.Source
-import io.circe.syntax.EncoderOps
 import io.circe.generic.auto._
-import io.swagger.v3.oas.annotations.{Operation, Parameter}
+import io.circe.syntax.EncoderOps
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.{Content, ExampleObject, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.{Operation, Parameter}
 import kezek.reservation.core.codec.MainCodec
 import kezek.reservation.core.domain.Reservation
 import kezek.reservation.core.service.NotificationService
+import org.joda.time.DateTime
 
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter.ISO_LOCAL_TIME
 import javax.ws.rs.{GET, Path}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
@@ -43,7 +44,9 @@ trait NotificationHttpRoutes extends MainCodec {
     description = "Returns a full information about reservation by id",
     method = "GET",
     parameters = Array(
-      new Parameter(name = "id", in = ParameterIn.PATH, example = "", required = true),
+      new Parameter(name = "tableId", in = ParameterIn.PATH, example = "", required = true),
+      new Parameter(name = "date", in = ParameterIn.QUERY, required = true),
+      new Parameter(name = "bookingTime", in = ParameterIn.QUERY, required = true, schema = new Schema(allowableValues = Array("До обеда", "После обеда", "Вечер"))),
     ),
     responses = Array(
       new ApiResponse(
@@ -59,17 +62,24 @@ trait NotificationHttpRoutes extends MainCodec {
       new ApiResponse(responseCode = "500", description = "Internal server error")
     )
   )
-  @Path("/notifications/{id}")
+  @Path("/notifications/table/{tableId}")
   @Tag(name = "Reservations")
   def sseStream: Route = {
-    import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
-    path(Segment) { tableId =>
-      get {
-        complete {
-          Source
-            .tick(2.seconds, 2.seconds, NotUsed)
-            .flatMapConcat(_ => Source.future(notificationService.get(tableId)))
-            .map(cb => ServerSentEvent(cb.asJson.noSpaces))
+    get {
+      path("table" / Segment) { tableId =>
+        parameters(
+          "date".as[DateTime],
+          "bookingTime"
+        ) {
+          (date, bookingTime) => {
+            import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
+            complete {
+              Source
+                .tick(2.seconds, 2.seconds, NotUsed)
+                .flatMapConcat(_ => Source.future(notificationService.get(tableId, date, bookingTime)))
+                .map(cb => ServerSentEvent(cb.asJson.noSpaces))
+            }
+          }
         }
       }
     }

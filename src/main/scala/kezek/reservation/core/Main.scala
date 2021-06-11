@@ -40,8 +40,8 @@ object Main extends App {
 
   implicit val tableService: TableService = new TableService()
   implicit val restaurantMapService: RestaurantMapService = new RestaurantMapService()
-  implicit val reservationService: ReservationService = new ReservationService()
   implicit val notificationService: NotificationService = new NotificationService()
+  implicit val reservationService: ReservationService = new ReservationService()
 
   HttpServer().run()
 

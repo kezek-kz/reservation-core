@@ -6,6 +6,7 @@ import kezek.reservation.core.codec.MainCodec
 import kezek.reservation.core.domain.ConcurrentBooker
 import kezek.reservation.core.repository.ConcurrentBookerRepository
 import kezek.reservation.core.repository.mongo.ConcurrentBookerMongoRepository
+import org.joda.time.DateTime
 import org.mongodb.scala.MongoClient
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -20,16 +21,20 @@ class NotificationService()(implicit val mongoClient: MongoClient,
   val concurrentBookerRepository: ConcurrentBookerRepository = new ConcurrentBookerMongoRepository()
 
 
-  def increment(tableId: String): Future[ConcurrentBooker] = {
-    concurrentBookerRepository.increment(tableId)
+  def increment(tableId: String, date: DateTime, bookingTime: String): Future[_] = {
+    concurrentBookerRepository.increment(tableId, date, bookingTime)
   }
 
-  def decrement(tableId: String): Future[ConcurrentBooker] = {
-    concurrentBookerRepository.decrement(tableId)
+  def decrement(tableId: String, date: DateTime, bookingTime: String): Future[_] = {
+    concurrentBookerRepository.decrement(tableId, date, bookingTime)
   }
 
-  def get(tableId: String): Future[ConcurrentBooker] = {
-    concurrentBookerRepository.get(tableId)
+  def reset(tableId: String, date: DateTime, bookingTime: String): Future[_] = {
+    concurrentBookerRepository.delete(tableId: String, date: DateTime, bookingTime: String)
+  }
+
+  def get(tableId: String, date: DateTime, bookingTime: String): Future[ConcurrentBooker] = {
+    concurrentBookerRepository.get(tableId, date.withTimeAtStartOfDay(), bookingTime)
   }
 
 }

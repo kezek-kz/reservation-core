@@ -18,6 +18,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URL
+import java.util.UUID
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.transform.{RewriteRule, RuleTransformer}
@@ -25,6 +26,7 @@ import scala.xml.{Attribute, Elem, Node, Null, Text, UnprefixedAttribute, XML}
 
 class RestaurantMapService()(implicit val mongoClient: MongoClient,
                              implicit val executionContext: ExecutionContext,
+                             implicit val tableService: TableService,
                              implicit val system: ActorSystem[_],
                              implicit val s3Client: AmazonS3) extends MainCodec {
 
@@ -70,7 +72,8 @@ class RestaurantMapService()(implicit val mongoClient: MongoClient,
 
     val rr: RewriteRule = new RewriteRule {
       override def transform(n: Node): Seq[Node] = n match {
-        case elem: Elem if elem.attributes.asAttrMap.contains("isTable") => elem % Attribute(None, "tableId", Text("someId"), Null)
+        case elem: Elem if elem.attributes.asAttrMap.contains("isTable") =>
+          elem % Attribute(None, "tableId", Text(UUID.randomUUID().toString), Null)
         case other => other
       }
     }

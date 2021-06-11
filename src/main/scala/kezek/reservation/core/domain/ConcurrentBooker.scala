@@ -1,3 +1,5 @@
 package kezek.reservation.core.domain
 
-case class ConcurrentBooker(tableId: String, int: Long)
+import org.joda.time.DateTime
+
+case class ConcurrentBooker(tableId: String, date: DateTime, bookingTime: String, count: Long)

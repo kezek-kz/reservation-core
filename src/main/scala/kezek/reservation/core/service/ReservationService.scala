@@ -52,6 +52,7 @@ object ReservationService extends MainCodec {
 
 class ReservationService()(implicit val mongoClient: MongoClient,
                            implicit val executionContext: ExecutionContext,
+                           implicit val notificationService: NotificationService,
                            implicit val tableService: TableService,
                            implicit val system: ActorSystem[_]) extends MainCodec {
 
@@ -74,11 +75,20 @@ class ReservationService()(implicit val mongoClient: MongoClient,
     log.debug(s"setState() was called {id $id, newState: ${newState.asJson.noSpaces}}")
     getById(id).flatMap { reservation =>
       if (isStateChangeValid(reservation, newState)) {
+        changeConcurrentBookerCount(newState.name, reservation.tables, reservation.date, reservation.bookingTime)
         reservationRepository.update(id, reservation.changeState(newState))
       } else {
         log.error(s"setState() invalid state change {id $id, currentStatus: ${reservation.status}, newStatus: ${newState.name}}")
         throw ApiException(StatusCodes.Conflict, "Invalid state change")
       }
+    }
+  }
+
+  def changeConcurrentBookerCount(status: String, tableIds: Seq[String], date: DateTime, bookingTime: String): Unit = {
+    status match {
+      case CREATED => tableIds.foreach(tableId => notificationService.increment(tableId, date, bookingTime))
+      case RESERVED => tableIds.foreach(tableId => notificationService.reset(tableId, date, bookingTime))
+      case _ => tableIds.foreach(tableId => notificationService.decrement(tableId, date, bookingTime))
     }
   }
 
@@ -135,6 +145,7 @@ class ReservationService()(implicit val mongoClient: MongoClient,
       reservation <- Future {
         createReservationDTO.into[Reservation]
           .withFieldConst(_.id, count)
+          .withFieldConst(_.date, createReservationDTO.date.withTimeAtStartOfDay())
           .withFieldConst(_.status, initState.name)
           .withFieldConst(_.createdAt, dateTimeNow)
           .withFieldConst(_.updatedAt, dateTimeNow)
@@ -151,7 +162,8 @@ class ReservationService()(implicit val mongoClient: MongoClient,
         case ex: Exception =>
           log.error(s"create() failed to create reservation {ex: $ex, reservation: ${reservation.asJson.noSpaces}}")
           throw ApiException(StatusCodes.ServiceUnavailable, ex.getMessage)
-      }
+      };
+      _ <- Future{ changeConcurrentBookerCount(CREATED, reservation.tables, reservation.date, reservation.bookingTime) }
     ) yield reservation
   }
 
