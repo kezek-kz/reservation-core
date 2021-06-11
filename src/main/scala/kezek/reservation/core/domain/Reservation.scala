@@ -7,7 +7,6 @@ import org.joda.time.DateTime
 case class Reservation(id: Long,
                        customerId: String,
                        tables: Seq[String],
-                       reservations: Seq[String],
                        date: DateTime,
                        bookingTime: String,
                        createdAt: DateTime,

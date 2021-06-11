@@ -5,7 +5,6 @@ import org.joda.time.DateTime
 
 case class CreateReservationDTO(customerId: String,
                                 tables: Seq[String],
-                                reservations: Seq[String],
                                 bookingTime: String,
                                 date: DateTime,
                                 paymentDetails: Option[Json])
