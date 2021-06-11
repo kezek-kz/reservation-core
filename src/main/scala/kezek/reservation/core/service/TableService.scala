@@ -75,10 +75,10 @@ class TableService()(implicit val mongoClient: MongoClient,
     }
   }
 
-  def create(mapId: String, createTableDTO: CreateTableDTO): Future[Table] = {
+  def create(createTableDTO: CreateTableDTO): Future[Table] = {
     log.debug(s"create() was called {createTableDTO: ${createTableDTO.asJson.noSpaces}}")
     val table = createTableDTO.into[Table]
-      .withFieldConst(_.mapId, mapId)
+      .withFieldConst(_.mapId, "")
       .enableOptionDefaultsToNone
       .transform
     for (

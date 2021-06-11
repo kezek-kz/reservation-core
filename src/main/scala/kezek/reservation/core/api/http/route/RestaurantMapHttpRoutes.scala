@@ -259,9 +259,9 @@ trait RestaurantMapHttpRoutes extends MainCodec {
   @Tag(name = "Restaurant Map / Tables")
   def addTable: Route = {
     post {
-      path("tables") { mapId =>
+      path("tables") {
         entity(as[CreateTableDTO]) { body =>
-          onComplete(tableService.create(mapId, body)) {
+          onComplete(tableService.create(body)) {
             case Success(result) => complete(result)
             case Failure(exception) => HttpUtil.completeThrowable(exception)
           }
@@ -304,7 +304,7 @@ trait RestaurantMapHttpRoutes extends MainCodec {
   @Tag(name = "Restaurant Map / Tables")
   def updateTable: Route = {
     put {
-      path("tables" / Segment) { (mapId, tableId) =>
+      path("tables" / Segment) { tableId =>
         entity(as[UpdateTableDTO]) { body =>
           onComplete(tableService.update(tableId, body)) {
             case Success(result) => complete(result)
