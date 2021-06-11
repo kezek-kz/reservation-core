@@ -258,7 +258,6 @@ trait RestaurantMapHttpRoutes extends MainCodec {
       new ApiResponse(responseCode = "500", description = "Internal server error")
     )
   )
-  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true)
   @Path("/tables")
   @Tag(name = "Restaurant Map / Tables")
   def addTable: Route = {
@@ -303,7 +302,6 @@ trait RestaurantMapHttpRoutes extends MainCodec {
     )
   )
   @Path("/tables/{id}")
-  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true)
   @Parameter(name = "id", in = ParameterIn.PATH, required = true)
   @Tag(name = "Restaurant Map / Tables")
   def updateTable: Route = {
